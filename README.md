@@ -1,2 +1,2 @@
 # communicator-with-GUI
-Using ZMQ and QT library.
+In progress.

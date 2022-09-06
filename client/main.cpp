@@ -1,7 +1,9 @@
 #include <iostream>
 
-int main()
-{
-    //TODO client app
-    return 0;
+#define BUFFERSIZE 100
+
+int main() {
+  // TODO client app
+  // TODO Error handling
+  return 0;
 }

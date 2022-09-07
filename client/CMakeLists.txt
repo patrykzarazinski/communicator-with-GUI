@@ -15,5 +15,4 @@ target_include_directories(${MODULE_LIB} PUBLIC include PRIVATE src)
 add_executable(${MODULE_NAME} main.cpp)
 
 target_link_libraries(${MODULE_NAME}
-    lib::client
-    cppzmq)
+    lib::client)

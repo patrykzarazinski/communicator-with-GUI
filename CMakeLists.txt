@@ -11,7 +11,6 @@ get_Property(propValue GLOBAL PROPERTY GLOBAL_DEPENDS_NO_CYCLES)
 message(STATUS "GLOBAL_DEPENDS_NO_CYCLES: " ${propValue})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-include(zmq)
 include(boost)
 
 add_custom_target(format COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/formatter.sh)

@@ -26,5 +26,6 @@ class ServerApp final {
   ServerContext serverContext;
   Clients clients;
   std::mutex mutex;
+  int clientIdTemporary;
 };
 }  // namespace server

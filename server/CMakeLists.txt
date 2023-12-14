@@ -3,9 +3,11 @@ set(MODULE_LIB ${MODUE_NAME}_lib)
 
 set(HEADERS
     include/ServerApp.hpp
-    include/ServerContext.hpp)
+    include/ServerContext.hpp
+    include/Receiver.hpp)
 set(SOURCES
-    src/ServerApp.cpp)
+    src/ServerApp.cpp
+    src/Receiver.cpp)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})
 add_library(lib::server ALIAS ${MODULE_LIB})

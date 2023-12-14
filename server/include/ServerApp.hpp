@@ -7,25 +7,25 @@
 #include "ServerContext.hpp"
 #include "types/ClientID.hpp"
 
-namespace server {
-class ServerApp final {
+namespace app {
+class Server {
  public:
   using Clients =
       std::unordered_map<types::ClientID, boost::asio::ip::tcp::socket>;
   using Client = Clients::iterator;
-  ServerApp(types::IP, types::Port);
-  virtual ~ServerApp();
 
-  void run();
+  Server();
+  virtual ~Server();
+
+  void run(types::IP, types::Port);
 
  private:
-  void receiveLoop();
+  void handleNewConnection();
+  void handleClient();
   void runClient(types::ClientID);
-  void broadcast(const types::ClientID&, std::string&);
 
   ServerContext serverContext;
   Clients clients;
   std::mutex mutex;
-  int clientIdTemporary;
 };
-}  // namespace server
+}  // namespace app

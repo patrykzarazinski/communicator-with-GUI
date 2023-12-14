@@ -4,8 +4,8 @@
 #include "ServerApp.hpp"
 
 void runApp(types::IP ip, types::Port port) {
-  server::ServerApp serverApp(ip, port);
-  serverApp.run();
+  app::Server server{};
+  server.run(ip, port);
 }
 
 int main(int argc, char** argv) {

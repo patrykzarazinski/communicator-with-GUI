@@ -12,7 +12,7 @@
 //#include <netinet/in.h> //sockaddr_in
 #include <arpa/inet.h>  //inet_pton, htons
 #include <sys/epoll.h>
-#include <unistd.h>  // close
+#include <unistd.h>  // close, read
 
 namespace {
 void clearBuffer(std::string& buffer) {
@@ -24,9 +24,7 @@ void clearBuffer(std::string& buffer) {
 }
 }  // namespace
 namespace app {
-Server::Server() : serverContext{} {
-  std::cout << "Server started" << std::endl;
-}
+Server::Server() { std::cout << "Server started" << std::endl; }
 
 void Server::run(types::IP ip, types::Port port) {
   int listener = socket(AF_INET, SOCK_STREAM,
@@ -41,17 +39,15 @@ void Server::run(types::IP ip, types::Port port) {
   serverAdress.sin_port = htons(static_cast<uint16_t>(std::atoi(port.c_str())));
   inet_pton(AF_INET, ip.c_str(), &serverAdress.sin_addr);
 
-  int result = bind(listener, reinterpret_cast<sockaddr*>(&serverAdress),
-                    sizeof(serverAdress));
-  if (result == -1) {
+  if (bind(listener, reinterpret_cast<sockaddr*>(&serverAdress),
+           sizeof(serverAdress)) == -1) {
     std::perror("bind() failed");
     close(listener);
     std::exit(EXIT_FAILURE);
   }
   int backlog = 10;  // maksymalna ilosc kolejki w oczekiwaniu na polaczenie,
                      // zastanow sie nad tym pozniej
-  result = listen(listener, backlog);
-  if (result == -1) {
+  if (listen(listener, backlog) == -1) {
     std::perror("listen() failed");
     close(listener);
     std::exit(EXIT_FAILURE);
@@ -88,10 +84,11 @@ void Server::run(types::IP ip, types::Port port) {
     }
 
     for (int i = 0; i < nfds; i++) {
-      if (events[i].data.fd == listener) {
-        handleNewConnection();
+      int fd = events[i].data.fd;
+      if (fd == listener) {
+        handleNewConnection(listener, epoll);
       } else {
-        handleClient();
+        handleClient(fd);
       }
     }
   }
@@ -101,26 +98,55 @@ void Server::run(types::IP ip, types::Port port) {
   return;
 }
 
-void Server::handleNewConnection() {
-  // todo
+void Server::handleNewConnection(int listener, int epoll) {
+  sockaddr_in clientAdress{};
+  socklen_t clientAddressLen = sizeof(clientAdress);
+
+  int newFd = accept4(listener, reinterpret_cast<sockaddr*>(&clientAdress),
+                      &clientAddressLen, SOCK_NONBLOCK);
+
+  if (newFd == -1) {  // add EAGAIN or EWOULDBLOCK handling
+    std::perror("accept4() failed");
+    close(listener);
+    close(epoll);
+    std::exit(EXIT_FAILURE);
+  }
+
+  epoll_event event;
+  event.events = EPOLLIN;  // EPOLLET?
+  event.data.fd = newFd;
+
+  if (epoll_ctl(epoll, EPOLL_CTL_ADD, newFd, &event) == -1) {
+    std::perror("epoll_ctl() failed");
+    close(listener);
+    close(epoll);
+    std::exit(EXIT_FAILURE);
+  }
 }
 
-void Server::handleClient() {
-  // todo
+void Server::handleClient(int fd) {
+  std::vector<char> buffer(1024, '\0');
+  ssize_t readBytes = recv(fd, buffer.data(), buffer.size(), MSG_DONTWAIT);
+
+  if (readBytes == -1) {
+    if (readBytes == EAGAIN or readBytes == EWOULDBLOCK) {
+      std::cout << "No messages are available at the socket" << std::endl;
+      return;
+    } else {
+      std::perror("recv() failed");
+      close(fd);
+      std::exit(EXIT_FAILURE);
+    }
+  } else if (readBytes == 0) {
+    std::cout << "Connection closed by peer" << std::endl;
+    return;
+  } else {
+    broadcast();
+  }
 }
 
-// void Server::runClient(types::ClientID clientID) {
-//   Client client = getClientData(mutex, clientID, clients);
-//   auto& socket = client->second;
-
-//   std::string buffer(512, '\0');
-//   while (true)  // TODO think about some exit of infinity loop
-//   {
-//     clearBuffer(buffer);
-//     socket.receive(boost::asio::buffer(buffer));  // return how many received
-//     //broadcast(clientID, buffer);
-//   }
-// }
-
+void Server::broadcast() {
+  // todo
+}
 Server::~Server() { std::cout << "Server shutdown" << std::endl; };
 }  // namespace app

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <mutex>
+#include <memory>
 
+#include "SocketCreator.hpp"
 #include "types/IP.hpp"
 #include "types/Port.hpp"
 
@@ -18,6 +19,6 @@ class Server {
   void handleClient(int);
   void broadcast();
 
-  std::mutex mutex;
+  std::unique_ptr<SocketCreator> socketCreator;
 };
 }  // namespace app

@@ -1,6 +1,9 @@
 #include "ServerApp.hpp"
 
+#include <netinet/in.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
+#include <unistd.h>  // close, read
 
 #include <cstdint>
 #include <cstdio>   //std::perror
@@ -9,10 +12,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-//#include <netinet/in.h> //sockaddr_in
-#include <arpa/inet.h>  //inet_pton, htons
-#include <sys/epoll.h>
-#include <unistd.h>  // close, read
+
+#include "TCPSocket.hpp"
+#include "TCPSocketCreator.hpp"
 
 namespace {
 void clearBuffer(std::string& buffer) {
@@ -24,34 +26,13 @@ void clearBuffer(std::string& buffer) {
 }
 }  // namespace
 namespace app {
-Server::Server() { std::cout << "Server started" << std::endl; }
+Server::Server() : socketCreator{std::make_unique<TCPSocketCreator>()} {
+  std::cout << "Server started" << std::endl;
+}
 
 void Server::run(types::IP ip, types::Port port) {
-  int listener = socket(AF_INET, SOCK_STREAM,
-                        0);  // int socket(int domain, int type, int protocol);
-  if (listener == -1) {
-    std::perror("socket() failed");
-    std::exit(EXIT_FAILURE);
-  }
-
-  sockaddr_in serverAdress{};
-  serverAdress.sin_family = AF_INET;
-  serverAdress.sin_port = htons(static_cast<uint16_t>(std::atoi(port.c_str())));
-  inet_pton(AF_INET, ip.c_str(), &serverAdress.sin_addr);
-
-  if (bind(listener, reinterpret_cast<sockaddr*>(&serverAdress),
-           sizeof(serverAdress)) == -1) {
-    std::perror("bind() failed");
-    close(listener);
-    std::exit(EXIT_FAILURE);
-  }
-  int backlog = 10;  // maksymalna ilosc kolejki w oczekiwaniu na polaczenie,
-                     // zastanow sie nad tym pozniej
-  if (listen(listener, backlog) == -1) {
-    std::perror("listen() failed");
-    close(listener);
-    std::exit(EXIT_FAILURE);
-  }
+  std::unique_ptr<Socket> socket = socketCreator->create();
+  int listener = socket->createSocket(ip, port);
 
   // epoll
   int epoll = epoll_create1(0);

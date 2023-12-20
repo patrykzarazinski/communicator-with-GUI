@@ -2,8 +2,10 @@ set(MODULE_LIB types)
 
 set(HEADERS
     include/types/ClientID.hpp
+    include/types/EpollFD.hpp
     include/types/IP.hpp
-    include/types/Port.hpp)
+    include/types/Port.hpp
+    include/types/SocketFD.hpp)
 # set(SOURCES
 #     src/types/Adress.cpp)
 

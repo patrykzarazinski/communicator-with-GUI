@@ -13,8 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "TCPSocket.hpp"
-#include "TCPSocketCreator.hpp"
+#include "builders/ConcreteNetworkCreator.hpp"
 
 namespace {
 void clearBuffer(std::string& buffer) {
@@ -26,32 +25,35 @@ void clearBuffer(std::string& buffer) {
 }
 }  // namespace
 namespace app {
-Server::Server() : socketCreator{std::make_unique<TCPSocketCreator>()} {
+Server::Server() : networkCreator{std::make_unique<ConcreteNetworkCreator>()} {
   std::cout << "Server started" << std::endl;
 }
 
 void Server::run(types::IP ip, types::Port port) {
-  std::unique_ptr<Socket> socket = socketCreator->create();
-  int listener = socket->createSocket(ip, port);
+  listenSocket = networkCreator->createSocket(ip, port);
+  epoll = networkCreator->createEpoll();
 
-  // epoll
-  int epoll = epoll_create1(0);
-  if (epoll == -1) {
-    std::perror("epoll_create1() failed");
-    close(listener);
-    std::exit(EXIT_FAILURE);
-  }
+  registerFD(listenSocket);
+  receiveLoop(listenSocket);
 
+  close(listenSocket);
+  close(epoll);
+  return;
+}
+
+void Server::registerFD(int fd) {
   epoll_event event;
   event.events = EPOLLIN;
-  event.data.fd = listener;
+  event.data.fd = fd;
 
-  if (epoll_ctl(epoll, EPOLL_CTL_ADD, listener, &event) == -1) {
+  if (epoll_ctl(epoll, EPOLL_CTL_ADD, fd, &event) == -1) {
     std::perror("epoll_ctl() failed");
-    close(listener);
+    close(fd);
     std::exit(EXIT_FAILURE);
   }
+}
 
+void Server::receiveLoop(int serverFD) {
   const int MAX_EVENTS = 10;
   std::vector<epoll_event> events(MAX_EVENTS);
   while (true) {
@@ -59,50 +61,37 @@ void Server::run(types::IP ip, types::Port port) {
 
     if (nfds == -1) {
       std::perror("epoll_wait() failed");
-      close(listener);
+      close(serverFD);
       close(epoll);
       std::exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < nfds; i++) {
       int fd = events[i].data.fd;
-      if (fd == listener) {
-        handleNewConnection(listener, epoll);
+      if (fd == serverFD) {
+        handleNewConnection(serverFD, epoll);
       } else {
         handleClient(fd);
       }
     }
   }
-
-  close(listener);
-  close(epoll);
-  return;
 }
 
-void Server::handleNewConnection(int listener, int epoll) {
+void Server::handleNewConnection(int serverFD, int epoll) {
   sockaddr_in clientAdress{};
   socklen_t clientAddressLen = sizeof(clientAdress);
 
-  int newFd = accept4(listener, reinterpret_cast<sockaddr*>(&clientAdress),
-                      &clientAddressLen, SOCK_NONBLOCK);
+  int clientFD = accept4(serverFD, reinterpret_cast<sockaddr*>(&clientAdress),
+                         &clientAddressLen, SOCK_NONBLOCK);
 
-  if (newFd == -1) {  // add EAGAIN or EWOULDBLOCK handling
+  if (clientFD == -1) {  // add EAGAIN or EWOULDBLOCK handling
     std::perror("accept4() failed");
-    close(listener);
+    close(serverFD);
     close(epoll);
     std::exit(EXIT_FAILURE);
   }
 
-  epoll_event event;
-  event.events = EPOLLIN;  // EPOLLET?
-  event.data.fd = newFd;
-
-  if (epoll_ctl(epoll, EPOLL_CTL_ADD, newFd, &event) == -1) {
-    std::perror("epoll_ctl() failed");
-    close(listener);
-    close(epoll);
-    std::exit(EXIT_FAILURE);
-  }
+  registerFD(clientFD);
 }
 
 void Server::handleClient(int fd) {

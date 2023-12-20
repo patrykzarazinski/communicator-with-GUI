@@ -3,15 +3,11 @@ set(MODULE_LIB ${MODUE_NAME}_lib)
 
 set(HEADERS
     include/ServerApp.hpp
-    include/ServerContext.hpp
-    include/Socket.hpp
-    include/SocketCreator.hpp
-    include/TCPSocket.hpp
-    include/TCPSocketCreator.hpp)
+    include/builders/NetworkCreator.hpp
+    include/builders/ConcreteNetworkCreator.hpp)
 set(SOURCES
     src/ServerApp.cpp
-    src/TCPSocket.cpp
-    src/TCPSocketCreator.cpp)
+    src/builders/ConcreteNetworkCreator.cpp)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})
 add_library(lib::server ALIAS ${MODULE_LIB})

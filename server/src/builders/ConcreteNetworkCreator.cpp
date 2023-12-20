@@ -1,9 +1,10 @@
-#include "TCPSocket.hpp"
+#include "builders/ConcreteNetworkCreator.hpp"
 
+#include <arpa/inet.h>   //inet_pton, htons
+#include <netinet/in.h>  //sockaddr_in
+#include <sys/epoll.h>
 #include <sys/socket.h>
-//#include <netinet/in.h> //sockaddr_in
-#include <arpa/inet.h>  //inet_pton, htons
-#include <unistd.h>     // close, read
+#include <unistd.h>  // close, read
 
 #include <cstdio>   //std::perror
 #include <cstdlib>  //std::exit, std::atoi
@@ -15,11 +16,10 @@ constexpr int BACKLOG = 10;  // maksymalna ilosc kolejki w oczekiwaniu na
 }  // namespace
 
 namespace app {
-TCPSocket::TCPSocket() {
-  // todo
-}
+ConcreteNetworkCreator::ConcreteNetworkCreator() {}
 
-int TCPSocket::createSocket(types::IP ip, types::Port port) {
+types::SocketFD ConcreteNetworkCreator::createSocket(types::IP ip,
+                                                     types::Port port) {
   int fd = socket(AF_INET, SOCK_STREAM, PROTOCOL);
   if (fd == -1) {
     std::perror("socket() failed");
@@ -44,10 +44,16 @@ int TCPSocket::createSocket(types::IP ip, types::Port port) {
     std::exit(EXIT_FAILURE);
   }
 
-  return fd;
+  return static_cast<types::SocketFD>(fd);
 }
 
-TCPSocket::~TCPSocket() {
-  // todo close when destructor is used for fd?
+types::EpollFD ConcreteNetworkCreator::createEpoll() {
+  int epoll = epoll_create1(0);
+  if (epoll == -1) {
+    std::perror("epoll_create1() failed");
+    std::exit(EXIT_FAILURE);
+  }
+  return static_cast<types::EpollFD>(epoll);
 }
+ConcreteNetworkCreator::~ConcreteNetworkCreator() {}
 }  // namespace app

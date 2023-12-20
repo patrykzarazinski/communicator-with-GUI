@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "ErrorCode.hpp"  //not used now
 #include "ServerApp.hpp"
 
 void runApp(types::IP ip, types::Port port) {

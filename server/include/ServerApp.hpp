@@ -17,14 +17,18 @@ class Server {
   void run(types::IP, types::Port);
 
  private:
-  void registerFD(int);
-  void receiveLoop(int);
-  void handleNewConnection(int, int);
-  void handleClient(int);
+  void receiveLoop();
+  void handleNewConnection();
+  void handleClient(types::SocketFD);
   void broadcast();
 
+  struct EpollManager {
+    void registerSocket(types::SocketFD);
+    types::EpollFD epoll;
+  };
+
   std::unique_ptr<NetworkCreator> networkCreator;
+  std::unique_ptr<EpollManager> epollManager;
   types::SocketFD listenSocket;
-  types::EpollFD epoll;
 };
 }  // namespace app

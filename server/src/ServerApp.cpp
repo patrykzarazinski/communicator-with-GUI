@@ -27,18 +27,17 @@ void clearBuffer(std::string& buffer) {
 namespace app {
 Server::Server()
     : networkCreator{std::make_unique<ConcreteNetworkCreator>()},
-      epollManager{std::make_unique<EpollManager>()} {
-  std::cout << "Server started" << std::endl;
-}
+      epollManager{std::make_unique<EpollManager>()},
+      serverIsRunning{false} {}
 
 void Server::run(types::IP ip, types::Port port) {
-  listenSocket = networkCreator->createSocket(ip, port);
+  serverSocket = networkCreator->createSocket(ip, port);
   epollManager->epoll = networkCreator->createEpoll();
 
-  epollManager->registerSocket(listenSocket);
+  epollManager->registerSocket(serverSocket);
   receiveLoop();
 
-  close(listenSocket);
+  close(serverSocket);
   close(epollManager->epoll);
   return;
 }
@@ -46,19 +45,20 @@ void Server::run(types::IP ip, types::Port port) {
 void Server::receiveLoop() {
   const int MAX_EVENTS = 10;
   std::vector<epoll_event> events(MAX_EVENTS);
-  while (true) {
+  serverIsRunning = true;
+  while (serverIsRunning) {
     int nfds = epoll_wait(epollManager->epoll, events.data(), MAX_EVENTS, -1);
 
     if (nfds == -1) {
       std::perror("epoll_wait() failed");
-      close(listenSocket);
+      close(serverSocket);
       close(epollManager->epoll);
       std::exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < nfds; i++) {
       int fd = events[i].data.fd;
-      if (fd == listenSocket) {
+      if (fd == serverSocket) {
         handleNewConnection();
       } else {
         handleClient(fd);
@@ -72,16 +72,17 @@ void Server::handleNewConnection() {
   socklen_t clientAddressLen = sizeof(clientAdress);
 
   int clientSocket =
-      accept4(listenSocket, reinterpret_cast<sockaddr*>(&clientAdress),
+      accept4(serverSocket, reinterpret_cast<sockaddr*>(&clientAdress),
               &clientAddressLen, SOCK_NONBLOCK);
 
   if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     std::perror("accept4() failed");
-    close(listenSocket);
+    close(serverSocket);
     close(epollManager->epoll);
     std::exit(EXIT_FAILURE);
   }
 
+  clientsSocket.push_back(clientSocket);
   epollManager->registerSocket(clientSocket);
 }
 
@@ -103,12 +104,16 @@ void Server::handleClient(types::SocketFD clientSocket) {
     std::cout << "Connection closed by peer" << std::endl;
     return;
   } else {
-    broadcast();
+    broadcast(buffer, clientSocket);
   }
 }
 
-void Server::broadcast() {
-  // todo
+void Server::broadcast(std::vector<char> buffer, types::SocketFD clientSocket) {
+  for (const types::SocketFD& fd : clientsSocket) {
+    if (fd != clientSocket) {
+      send(fd, buffer.data(), buffer.size(), 0);
+    }
+  }
 }
 
 void Server::EpollManager::registerSocket(types::SocketFD fd) {

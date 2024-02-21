@@ -16,6 +16,7 @@ jobs:
       with:
         boost_version: 1.74.0
         platform_version: 22.04
+        version: default
     - name: Generate CMake
       run: cmake -B ${{github.workspace}}/build
     - name: Build project

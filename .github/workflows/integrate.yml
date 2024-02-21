@@ -12,11 +12,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install Boost
-      uses: MarkusJx/install-boost@v2.4.5
+      uses: egor-tensin/build-boost@v1
       with:
-        boost_version: 1.74.0
-        platform_version: 22.04
-        version: default
+        version: 1.74.0
+        libraries: thread
     - name: Generate CMake
       run: cmake -B ${{github.workspace}}/build
     - name: Build project

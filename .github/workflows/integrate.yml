@@ -16,6 +16,7 @@ jobs:
       with:
         version: 1.74.0
         libraries: thread
+        directory: cmake
     - name: Generate CMake
       run: cmake -B ${{github.workspace}}/build
     - name: Build project

@@ -18,7 +18,7 @@ constexpr int BACKLOG = 10;  // maksymalna ilosc kolejki w oczekiwaniu na
 namespace app {
 ConcreteNetworkCreator::ConcreteNetworkCreator() {}
 
-types::SocketFD ConcreteNetworkCreator::createSocket(types::IP ip,
+types::FD ConcreteNetworkCreator::createSocket(types::IP ip,
                                                      types::Port port) {
   int fd = socket(AF_INET, SOCK_STREAM, PROTOCOL);
   if (fd == -1) {
@@ -44,16 +44,7 @@ types::SocketFD ConcreteNetworkCreator::createSocket(types::IP ip,
     std::exit(EXIT_FAILURE);
   }
 
-  return static_cast<types::SocketFD>(fd);
-}
-
-types::EpollFD ConcreteNetworkCreator::createEpoll() {
-  int epoll = epoll_create1(0);
-  if (epoll == -1) {
-    std::perror("epoll_create1() failed");
-    std::exit(EXIT_FAILURE);
-  }
-  return static_cast<types::EpollFD>(epoll);
+  return static_cast<types::FD>(fd);
 }
 ConcreteNetworkCreator::~ConcreteNetworkCreator() {}
 }  // namespace app

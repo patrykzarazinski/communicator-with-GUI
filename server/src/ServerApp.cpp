@@ -32,7 +32,7 @@ Server::Server()
 
 void Server::run(types::IP ip, types::Port port) {
   serverSocket = networkCreator->createSocket(ip, port);
-  epollManager->epoll = networkCreator->createEpoll();
+  epollManager->epoll = epollManager->createEpoll();
 
   epollManager->registerSocket(serverSocket);
   receiveLoop();
@@ -86,7 +86,7 @@ void Server::handleNewConnection() {
   epollManager->registerSocket(clientSocket);
 }
 
-void Server::handleClient(types::SocketFD clientSocket) {
+void Server::handleClient(types::FD clientSocket) {
   std::vector<char> buffer(1024, '\0');
   ssize_t readBytes =
       recv(clientSocket, buffer.data(), buffer.size(), MSG_DONTWAIT);
@@ -108,15 +108,15 @@ void Server::handleClient(types::SocketFD clientSocket) {
   }
 }
 
-void Server::broadcast(std::vector<char> buffer, types::SocketFD clientSocket) {
-  for (const types::SocketFD& fd : clientsSocket) {
+void Server::broadcast(std::vector<char> buffer, types::FD clientSocket) {
+  for (const types::FD& fd : clientsSocket) {
     if (fd != clientSocket) {
       send(fd, buffer.data(), buffer.size(), 0);
     }
   }
 }
 
-void Server::EpollManager::registerSocket(types::SocketFD fd) {
+void Server::EpollManager::registerSocket(types::FD fd) {
   epoll_event event;
   event.events = EPOLLIN;
   event.data.fd = fd;
@@ -126,6 +126,16 @@ void Server::EpollManager::registerSocket(types::SocketFD fd) {
     close(fd);
     std::exit(EXIT_FAILURE);
   }
+}
+
+types::FD Server::EpollManager::createEpoll() {
+  int ignoredFlag = 0;
+  types::FD epoll = static_cast<types::FD>(epoll_create1(ignoredFlag));
+  if (epoll == -1) {
+    std::perror("epoll_create1() failed");
+    std::exit(EXIT_FAILURE);
+  }
+  return epoll;
 }
 
 Server::~Server() { std::cout << "Server shutdown" << std::endl; };

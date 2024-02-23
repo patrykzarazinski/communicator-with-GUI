@@ -3,10 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "types/EpollFD.hpp"
+#include "types/FD.hpp"
 #include "types/IP.hpp"
 #include "types/Port.hpp"
-#include "types/SocketFD.hpp"
+#include "types/FD.hpp"
 
 namespace app {
 class NetworkCreator;
@@ -20,18 +20,19 @@ class Server {
  private:
   void receiveLoop();
   void handleNewConnection();
-  void handleClient(types::SocketFD);
-  void broadcast(std::vector<char>, types::SocketFD);
+  void handleClient(types::FD);
+  void broadcast(std::vector<char>, types::FD);
 
   struct EpollManager {
-    void registerSocket(types::SocketFD);
-    types::EpollFD epoll;
+    void registerSocket(types::FD);
+    types::FD createEpoll();
+    types::FD epoll;
   };
 
   std::unique_ptr<NetworkCreator> networkCreator;
   std::unique_ptr<EpollManager> epollManager;
-  types::SocketFD serverSocket;
+  types::FD serverSocket;
   bool serverIsRunning;
-  std::vector<types::SocketFD> clientsSocket;
+  std::vector<types::FD> clientsSocket;
 };
 }  // namespace app

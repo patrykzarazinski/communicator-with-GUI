@@ -8,7 +8,6 @@ class ConcreteNetworkCreator : public NetworkCreator {
   ConcreteNetworkCreator();
   virtual ~ConcreteNetworkCreator();
 
-  types::SocketFD createSocket(types::IP, types::Port) override;
-  types::EpollFD createEpoll() override;
+  types::FD createSocket(types::IP, types::Port) override;
 };
 }  // namespace app

@@ -29,4 +29,10 @@ void Socket::receive() {
 }
 
 types::FD Socket::getFD() { return *_socket; }
+
+Socket::~Socket() {
+  if (_socket) {
+    close(*_socket);
+  }
+}
 }  // namespace network

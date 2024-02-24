@@ -27,4 +27,10 @@ void ListenSocket::receive() {
 }
 
 types::FD ListenSocket::getFD() { return *_socket; }
+
+ListenSocket::~ListenSocket() {
+  if (_socket) {
+    close(*_socket);
+  }
+}
 }  // namespace network

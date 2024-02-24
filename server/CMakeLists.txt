@@ -2,9 +2,11 @@ set(MODULE_NAME server)
 set(MODULE_LIB ${MODUE_NAME}_lib)
 
 set(HEADERS
-    include/ServerApp.hpp)
+    include/ServerApp.hpp
+    include/Epoll.hpp)
 set(SOURCES
-    src/ServerApp.cpp)
+    src/ServerApp.cpp
+    src/Epoll.cpp)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})
 add_library(lib::server ALIAS ${MODULE_LIB})

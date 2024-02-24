@@ -25,14 +25,18 @@ class Server {
   void handleClient(types::FD);
   void broadcast(std::vector<char>, types::FD);
 
-  struct EpollManager {
+  class Epoll {
+   public:
+    void createEpoll();
     void registerSocket(types::FD);
-    types::FD createEpoll();
-    types::FD epoll;
+    types::FD getEpoll();
+
+   private:
+    std::unique_ptr<types::FD> _epoll;
   };
 
   std::unique_ptr<network::BaseSocket> socket;
-  std::unique_ptr<EpollManager> epollManager;
+  std::unique_ptr<Epoll> epoll;
   bool serverIsRunning;
   std::vector<types::FD> clientsSocket;
 };

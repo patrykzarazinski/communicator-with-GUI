@@ -2,17 +2,18 @@ set(MODULE_NAME server)
 set(MODULE_LIB ${MODUE_NAME}_lib)
 
 set(HEADERS
-    include/ServerApp.hpp
-    include/builders/NetworkCreator.hpp
-    include/builders/ConcreteNetworkCreator.hpp)
+    include/ServerApp.hpp)
 set(SOURCES
-    src/ServerApp.cpp
-    src/builders/ConcreteNetworkCreator.cpp)
+    src/ServerApp.cpp)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})
 add_library(lib::server ALIAS ${MODULE_LIB})
 
-target_link_libraries(${MODULE_LIB} PUBLIC ${Boost_LIBRARIES} lib::types)
+target_link_libraries(${MODULE_LIB} 
+PUBLIC
+    ${Boost_LIBRARIES}
+    lib::types
+    lib::network)
 target_include_directories(${MODULE_LIB} PUBLIC include PRIVATE src)
 
 add_executable(${MODULE_NAME} main.cpp)

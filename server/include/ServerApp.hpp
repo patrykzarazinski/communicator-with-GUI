@@ -9,9 +9,10 @@
 
 namespace network {
 class BaseSocket;
-}
+}  // namespace network
 
 namespace app {
+class Epoll;
 class Server {
  public:
   Server();
@@ -24,16 +25,6 @@ class Server {
   void handleNewConnection();
   void handleClient(types::FD);
   void broadcast(std::vector<char>, types::FD);
-
-  class Epoll {
-   public:
-    void createEpoll();
-    void registerSocket(types::FD);
-    types::FD getEpoll();
-
-   private:
-    std::unique_ptr<types::FD> _epoll;
-  };
 
   std::unique_ptr<network::BaseSocket> socket;
   std::unique_ptr<Epoll> epoll;

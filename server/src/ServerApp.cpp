@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "Epoll.hpp"
 #include "network/ListenSocket.hpp"
 
 namespace {
@@ -37,7 +38,6 @@ void Server::run(types::IP ip, types::Port port) {
   epoll->registerSocket(socket->getFD());
   receiveLoop();
 
-  close(epoll->getEpoll());
   return;
 }
 
@@ -50,7 +50,6 @@ void Server::receiveLoop() {
 
     if (nfds == -1) {
       std::perror("epoll_wait() failed");
-      close(epoll->getEpoll());
       std::exit(EXIT_FAILURE);
     }
 
@@ -75,7 +74,6 @@ void Server::handleNewConnection() {
 
   if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     std::perror("accept4() failed");
-    close(epoll->getEpoll());
     std::exit(EXIT_FAILURE);
   }
 
@@ -112,36 +110,6 @@ void Server::broadcast(std::vector<char> buffer, types::FD clientSocket) {
     }
   }
 }
-
-void Server::Epoll::createEpoll() {
-  if (_epoll) {
-    return;
-  }
-
-  int ignoredFlag = 0;
-  types::FD fd = static_cast<types::FD>(epoll_create1(ignoredFlag));
-
-  if (fd == -1) {
-    std::perror("epoll_create1() failed");
-    std::exit(EXIT_FAILURE);
-  }
-
-  _epoll = std::make_unique<types::FD>(fd);
-}
-
-void Server::Epoll::registerSocket(types::FD fd) {
-  epoll_event event;
-  event.events = EPOLLIN;
-  event.data.fd = fd;
-
-  if (epoll_ctl(*_epoll, EPOLL_CTL_ADD, fd, &event) == -1) {
-    std::perror("epoll_ctl() failed");
-    close(fd);
-    std::exit(EXIT_FAILURE);
-  }
-}
-
-types::FD Server::Epoll::getEpoll() { return *_epoll; }
 
 Server::~Server() { std::cout << "Server shutdown" << std::endl; };
 }  // namespace app

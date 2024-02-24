@@ -27,18 +27,18 @@ void clearBuffer(std::string& buffer) {
 namespace app {
 Server::Server()
     : socket{std::make_unique<network::ListenSocket>()},
-      epollManager{std::make_unique<EpollManager>()},
+      epoll{std::make_unique<Epoll>()},
       serverIsRunning{false} {}
 
 void Server::run(types::IP ip, types::Port port) {
   socket->createSocket(ip, port);
-  epollManager->epoll = epollManager->createEpoll();
+  epoll->createEpoll();
 
-  epollManager->registerSocket(socket->getFD());
+  epoll->registerSocket(socket->getFD());
   receiveLoop();
 
   close(socket->getFD());
-  close(epollManager->epoll);
+  close(epoll->getEpoll());
   return;
 }
 
@@ -47,12 +47,12 @@ void Server::receiveLoop() {
   std::vector<epoll_event> events(MAX_EVENTS);
   serverIsRunning = true;
   while (serverIsRunning) {
-    int nfds = epoll_wait(epollManager->epoll, events.data(), MAX_EVENTS, -1);
+    int nfds = epoll_wait(epoll->getEpoll(), events.data(), MAX_EVENTS, -1);
 
     if (nfds == -1) {
       std::perror("epoll_wait() failed");
       close(socket->getFD());
-      close(epollManager->epoll);
+      close(epoll->getEpoll());
       std::exit(EXIT_FAILURE);
     }
 
@@ -78,12 +78,12 @@ void Server::handleNewConnection() {
   if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     std::perror("accept4() failed");
     close(socket->getFD());
-    close(epollManager->epoll);
+    close(epoll->getEpoll());
     std::exit(EXIT_FAILURE);
   }
 
   clientsSocket.push_back(clientSocket);
-  epollManager->registerSocket(clientSocket);
+  epoll->registerSocket(clientSocket);
 }
 
 void Server::handleClient(types::FD clientSocket) {
@@ -116,27 +116,35 @@ void Server::broadcast(std::vector<char> buffer, types::FD clientSocket) {
   }
 }
 
-void Server::EpollManager::registerSocket(types::FD fd) {
+void Server::Epoll::createEpoll() {
+  if (_epoll) {
+    return;
+  }
+
+  int ignoredFlag = 0;
+  types::FD fd = static_cast<types::FD>(epoll_create1(ignoredFlag));
+
+  if (fd == -1) {
+    std::perror("epoll_create1() failed");
+    std::exit(EXIT_FAILURE);
+  }
+
+  _epoll = std::make_unique<types::FD>(fd);
+}
+
+void Server::Epoll::registerSocket(types::FD fd) {
   epoll_event event;
   event.events = EPOLLIN;
   event.data.fd = fd;
 
-  if (epoll_ctl(epoll, EPOLL_CTL_ADD, fd, &event) == -1) {
+  if (epoll_ctl(*_epoll, EPOLL_CTL_ADD, fd, &event) == -1) {
     std::perror("epoll_ctl() failed");
     close(fd);
     std::exit(EXIT_FAILURE);
   }
 }
 
-types::FD Server::EpollManager::createEpoll() {
-  int ignoredFlag = 0;
-  types::FD epoll = static_cast<types::FD>(epoll_create1(ignoredFlag));
-  if (epoll == -1) {
-    std::perror("epoll_create1() failed");
-    std::exit(EXIT_FAILURE);
-  }
-  return epoll;
-}
+types::FD Server::Epoll::getEpoll() { return *_epoll; }
 
 Server::~Server() { std::cout << "Server shutdown" << std::endl; };
 }  // namespace app

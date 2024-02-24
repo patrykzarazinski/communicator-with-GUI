@@ -9,7 +9,7 @@ namespace network {
 class ListenSocket : public BaseSocket {
  public:
   ListenSocket() = default;
-  virtual ~ListenSocket() = default;
+  virtual ~ListenSocket();
 
   void createSocket(types::IP, types::Port) override;
   void receive() override;

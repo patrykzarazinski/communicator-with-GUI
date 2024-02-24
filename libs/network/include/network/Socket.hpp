@@ -9,7 +9,7 @@ namespace network {
 class Socket : public BaseSocket {
  public:
   Socket() = default;
-  virtual ~Socket() = default;
+  virtual ~Socket();
 
   void createSocket(types::IP, types::Port) override;
   void send() override;

@@ -37,7 +37,6 @@ void Server::run(types::IP ip, types::Port port) {
   epoll->registerSocket(socket->getFD());
   receiveLoop();
 
-  close(socket->getFD());
   close(epoll->getEpoll());
   return;
 }
@@ -51,7 +50,6 @@ void Server::receiveLoop() {
 
     if (nfds == -1) {
       std::perror("epoll_wait() failed");
-      close(socket->getFD());
       close(epoll->getEpoll());
       std::exit(EXIT_FAILURE);
     }
@@ -77,7 +75,6 @@ void Server::handleNewConnection() {
 
   if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     std::perror("accept4() failed");
-    close(socket->getFD());
     close(epoll->getEpoll());
     std::exit(EXIT_FAILURE);
   }

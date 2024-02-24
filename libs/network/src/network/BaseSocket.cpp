@@ -4,8 +4,7 @@
 #include <sys/socket.h>
 #include <unistd.h>  // close, read
 
-#include <cstdio>   //std::perror
-#include <cstdlib>  //std::exit, std::atoi
+#include "utils/ErrorHandler.hpp"
 
 namespace {
 constexpr int PROTOCOL = 0;
@@ -21,25 +20,22 @@ void BaseSocket::receive() {}
 types::FD BaseSocket::b_socket() {
   types::FD fd = socket(AF_INET, SOCK_STREAM, PROTOCOL);
   if (fd == -1) {
-    std::perror("socket() failed");
-    std::exit(EXIT_FAILURE);
+    utils::ErrorHandler::handleError("socket() failed");
   }
   return fd;
 }
 
 void BaseSocket::b_bind(sockaddr_in &adress, types::FD &fd) {
   if (bind(fd, reinterpret_cast<sockaddr *>(&adress), sizeof(adress)) == -1) {
-    std::perror("bind() failed");
     close(fd);
-    std::exit(EXIT_FAILURE);
+    utils::ErrorHandler::handleError("bind() failed");
   }
 }
 
 void BaseSocket::b_listen(types::FD &fd) {
   if (listen(fd, BACKLOG) == -1) {
-    std::perror("listen() failed");
     close(fd);
-    std::exit(EXIT_FAILURE);
+    utils::ErrorHandler::handleError("listen() failed");
   }
 }
 }  // namespace network

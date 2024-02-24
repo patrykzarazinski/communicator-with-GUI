@@ -6,8 +6,6 @@
 #include <unistd.h>  // close, read
 
 #include <cstdint>
-#include <cstdio>   //std::perror
-#include <cstdlib>  //std::exit, std::atoi
 #include <iostream>
 #include <string>
 #include <utility>
@@ -15,6 +13,7 @@
 
 #include "Epoll.hpp"
 #include "network/ListenSocket.hpp"
+#include "utils/ErrorHandler.hpp"
 
 namespace {
 void clearBuffer(std::string& buffer) {
@@ -49,8 +48,7 @@ void Server::receiveLoop() {
     int nfds = epoll_wait(epoll->getEpoll(), events.data(), MAX_EVENTS, -1);
 
     if (nfds == -1) {
-      std::perror("epoll_wait() failed");
-      std::exit(EXIT_FAILURE);
+      utils::ErrorHandler::handleError("epoll_wait() failed");
     }
 
     for (int i = 0; i < nfds; i++) {
@@ -73,8 +71,7 @@ void Server::handleNewConnection() {
               &clientAddressLen, SOCK_NONBLOCK);
 
   if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
-    std::perror("accept4() failed");
-    std::exit(EXIT_FAILURE);
+    utils::ErrorHandler::handleError("accept4() failed");
   }
 
   clientsSocket.push_back(clientSocket);
@@ -91,9 +88,8 @@ void Server::handleClient(types::FD clientSocket) {
       std::cout << "No messages are available at the socket" << std::endl;
       return;
     } else {
-      std::perror("recv() failed");
       close(clientSocket);
-      std::exit(EXIT_FAILURE);
+      utils::ErrorHandler::handleError("recv() failed");
     }
   } else if (readBytes == 0) {
     std::cout << "Connection closed by peer" << std::endl;

@@ -3,8 +3,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>  // close, read
 
-#include <cstdio>   //std::perror
-#include <cstdlib>  //std::exit, std::atoi
+#include "utils/ErrorHandler.hpp"
 
 namespace app {
 void Epoll::createEpoll() {
@@ -16,8 +15,7 @@ void Epoll::createEpoll() {
   types::FD fd = static_cast<types::FD>(epoll_create1(ignoredFlag));
 
   if (fd == -1) {
-    std::perror("epoll_create1() failed");
-    std::exit(EXIT_FAILURE);
+    utils::ErrorHandler::handleError("epoll_create1() failed");
   }
 
   _epoll = std::make_unique<types::FD>(fd);
@@ -29,9 +27,8 @@ void Epoll::registerSocket(types::FD fd) {
   event.data.fd = fd;
 
   if (epoll_ctl(*_epoll, EPOLL_CTL_ADD, fd, &event) == -1) {
-    std::perror("epoll_ctl() failed");
     close(fd);
-    std::exit(EXIT_FAILURE);
+    utils::ErrorHandler::handleError("epoll_ctl(() failed");
   }
 }
 

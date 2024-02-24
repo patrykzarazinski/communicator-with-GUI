@@ -16,4 +16,5 @@ target_include_directories(${MODULE_LIB} PUBLIC include PRIVATE src)
 
 target_link_libraries(${MODULE_LIB}
 PRIVATE
-    lib::types)
+    lib::types
+    lib::utils)

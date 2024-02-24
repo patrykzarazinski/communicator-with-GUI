@@ -3,6 +3,8 @@
 #include <arpa/inet.h>   //inet_pton, htons
 #include <netinet/in.h>  //sockaddr_in
 
+#include <cstdlib>  //std::exit, std::atoi
+
 namespace network {
 void ListenSocket::createSocket(types::IP ip, types::Port port) {
   if (_socket) {

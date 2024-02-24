@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "builders/ConcreteNetworkCreator.hpp"
+#include "network/ListenSocket.hpp"
 
 namespace {
 void clearBuffer(std::string& buffer) {
@@ -26,18 +26,18 @@ void clearBuffer(std::string& buffer) {
 }  // namespace
 namespace app {
 Server::Server()
-    : networkCreator{std::make_unique<ConcreteNetworkCreator>()},
+    : socket{std::make_unique<network::ListenSocket>()},
       epollManager{std::make_unique<EpollManager>()},
       serverIsRunning{false} {}
 
 void Server::run(types::IP ip, types::Port port) {
-  serverSocket = networkCreator->createSocket(ip, port);
+  socket->createSocket(ip, port);
   epollManager->epoll = epollManager->createEpoll();
 
-  epollManager->registerSocket(serverSocket);
+  epollManager->registerSocket(socket->getFD());
   receiveLoop();
 
-  close(serverSocket);
+  close(socket->getFD());
   close(epollManager->epoll);
   return;
 }
@@ -51,14 +51,14 @@ void Server::receiveLoop() {
 
     if (nfds == -1) {
       std::perror("epoll_wait() failed");
-      close(serverSocket);
+      close(socket->getFD());
       close(epollManager->epoll);
       std::exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < nfds; i++) {
       int fd = events[i].data.fd;
-      if (fd == serverSocket) {
+      if (fd == socket->getFD()) {
         handleNewConnection();
       } else {
         handleClient(fd);
@@ -72,12 +72,12 @@ void Server::handleNewConnection() {
   socklen_t clientAddressLen = sizeof(clientAdress);
 
   int clientSocket =
-      accept4(serverSocket, reinterpret_cast<sockaddr*>(&clientAdress),
+      accept4(socket->getFD(), reinterpret_cast<sockaddr*>(&clientAdress),
               &clientAddressLen, SOCK_NONBLOCK);
 
   if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     std::perror("accept4() failed");
-    close(serverSocket);
+    close(socket->getFD());
     close(epollManager->epoll);
     std::exit(EXIT_FAILURE);
   }

@@ -6,10 +6,12 @@
 #include "types/FD.hpp"
 #include "types/IP.hpp"
 #include "types/Port.hpp"
-#include "types/FD.hpp"
+
+namespace network {
+class BaseSocket;
+}
 
 namespace app {
-class NetworkCreator;
 class Server {
  public:
   Server();
@@ -29,9 +31,8 @@ class Server {
     types::FD epoll;
   };
 
-  std::unique_ptr<NetworkCreator> networkCreator;
+  std::unique_ptr<network::BaseSocket> socket;
   std::unique_ptr<EpollManager> epollManager;
-  types::FD serverSocket;
   bool serverIsRunning;
   std::vector<types::FD> clientsSocket;
 };

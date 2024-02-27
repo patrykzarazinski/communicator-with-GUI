@@ -15,6 +15,8 @@
 #include "network/ListenSocket.hpp"
 #include "utils/ErrorHandler.hpp"
 
+static bool isRunning = false;
+
 namespace {
 void clearBuffer(std::string& buffer) {
   // TODO Using std::string::clear or std::string::erase lead to infinity loop
@@ -23,12 +25,12 @@ void clearBuffer(std::string& buffer) {
     item = '\0';
   }
 }
+
 }  // namespace
 namespace app {
 Server::Server()
     : socket{std::make_unique<network::ListenSocket>()},
-      epoll{std::make_unique<Epoll>()},
-      serverIsRunning{false} {}
+      epoll{std::make_unique<Epoll>()} {}
 
 void Server::run(types::IP ip, types::Port port) {
   socket->createSocket(ip, port);
@@ -43,8 +45,9 @@ void Server::run(types::IP ip, types::Port port) {
 void Server::receiveLoop() {
   const int MAX_EVENTS = 10;
   std::vector<epoll_event> events(MAX_EVENTS);
-  serverIsRunning = true;
-  while (serverIsRunning) {
+
+  isRunning = true;
+  while (isRunning) {
     int nfds = epoll_wait(epoll->getEpoll(), events.data(), MAX_EVENTS, -1);
 
     if (nfds == -1) {

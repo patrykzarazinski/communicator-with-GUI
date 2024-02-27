@@ -28,7 +28,6 @@ class Server {
 
   std::unique_ptr<network::BaseSocket> socket;
   std::unique_ptr<Epoll> epoll;
-  bool serverIsRunning;
   std::vector<types::FD> clientsSocket;
 };
 }  // namespace app

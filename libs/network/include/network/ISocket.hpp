@@ -9,20 +9,20 @@
 struct sockaddr_in;
 
 namespace network {
-class BaseSocket {
+class ISocket {
  public:
-  BaseSocket() = default;
-  virtual ~BaseSocket() = default;
+  ISocket() = default;
+  virtual ~ISocket() = default;
 
   virtual void createSocket(types::IP, types::Port) = 0;
-  virtual void send();
-  virtual void receive();
-  virtual types::FD getFD() = 0;
+  virtual types::FD getFD();
+  virtual types::FD accept();
 
  protected:
-  types::FD b_socket();
-  void b_bind(sockaddr_in&, types::FD&);
-  void b_listen(types::FD&);
+  types::FD s_socket();
+  types::FD s_accept4();
+  void s_bind(sockaddr_in&, types::FD&);
+  void s_listen(types::FD&);
 
   std::unique_ptr<types::FD> _socket{nullptr};
 };

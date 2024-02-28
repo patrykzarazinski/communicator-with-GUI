@@ -8,7 +8,7 @@
 #include "types/Port.hpp"
 
 namespace network {
-class BaseSocket;
+class ISocket;
 }  // namespace network
 
 namespace app {
@@ -26,7 +26,7 @@ class Server {
   void handleClient(types::FD);
   void broadcast(std::vector<char>, types::FD);
 
-  std::unique_ptr<network::BaseSocket> listenSocket;
+  std::unique_ptr<network::ISocket> listenSocket;
   std::unique_ptr<Epoll> epoll;
   std::vector<types::FD> sockets;
 };

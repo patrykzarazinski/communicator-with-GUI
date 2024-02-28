@@ -1,4 +1,4 @@
-#include "network/BaseSocket.hpp"
+#include "network/ISocket.hpp"
 
 #include <netinet/in.h>  //sockaddr_in
 #include <sys/socket.h>
@@ -13,11 +13,11 @@ constexpr int BACKLOG = 10;  // maksymalna ilosc kolejki w oczekiwaniu na
 }  // namespace
 
 namespace network {
-void BaseSocket::send() {}
+types::FD ISocket::getFD() { return *_socket; }
 
-void BaseSocket::receive() {}
+types::FD ISocket::accept() { return -1; }
 
-types::FD BaseSocket::b_socket() {
+types::FD ISocket::s_socket() {
   types::FD fd = socket(AF_INET, SOCK_STREAM, PROTOCOL);
   if (fd == -1) {
     utils::ErrorHandler::handleError("socket() failed");
@@ -25,14 +25,22 @@ types::FD BaseSocket::b_socket() {
   return fd;
 }
 
-void BaseSocket::b_bind(sockaddr_in &adress, types::FD &fd) {
+types::FD ISocket::s_accept4() {
+  sockaddr_in address{};
+  socklen_t addressLen = sizeof(address);
+
+  return accept4(*_socket, reinterpret_cast<sockaddr *>(&address), &addressLen,
+                 SOCK_NONBLOCK);
+}
+
+void ISocket::s_bind(sockaddr_in &adress, types::FD &fd) {
   if (bind(fd, reinterpret_cast<sockaddr *>(&adress), sizeof(adress)) == -1) {
     close(fd);
     utils::ErrorHandler::handleError("bind() failed");
   }
 }
 
-void BaseSocket::b_listen(types::FD &fd) {
+void ISocket::s_listen(types::FD &fd) {
   if (listen(fd, BACKLOG) == -1) {
     close(fd);
     utils::ErrorHandler::handleError("listen() failed");

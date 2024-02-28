@@ -1,7 +1,6 @@
 #include "ServerApp.hpp"
 
 #include <netinet/in.h>
-#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>  // close, read
 
@@ -43,20 +42,16 @@ void Server::run(types::IP ip, types::Port port) {
 }
 
 void Server::receiveLoop() {
-  const int MAX_EVENTS = 10;
-  const int BLOCK = 1;
-  std::vector<epoll_event> events(MAX_EVENTS);
-
   isRunning = true;
   while (isRunning) {
-    int nfds = epoll_wait(epoll->getEpoll(), events.data(), MAX_EVENTS, BLOCK);
+    types::NFDS nfds = epoll->wait_for_event();
 
     if (nfds == -1) {
-      utils::ErrorHandler::handleError("epoll_wait() failed");
+      utils::ErrorHandler::handleError("wait_for_event|epoll_wait() failed");
     }
 
     for (int i = 0; i < nfds; i++) {
-      int fd = events[i].data.fd;
+      types::FD fd = epoll->getFD(i);
       if (fd == listenSocket->getFD()) {
         handleNewConnection();
       } else {

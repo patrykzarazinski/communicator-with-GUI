@@ -3,7 +3,16 @@
 #include <sys/epoll.h>
 #include <unistd.h>  // close, read
 
+#include <vector>
+
 #include "utils/ErrorHandler.hpp"
+
+namespace {
+const int MAX_EVENTS = 10;
+const int BLOCK = 1;
+}  // namespace
+
+static std::vector<epoll_event> events(MAX_EVENTS);
 
 namespace app {
 void Epoll::createEpoll() {
@@ -31,6 +40,12 @@ void Epoll::registerSocket(types::FD fd) {
     utils::ErrorHandler::handleError("epoll_ctl(() failed");
   }
 }
+
+types::NFDS Epoll::wait_for_event() {
+  return epoll_wait(*_epoll, events.data(), MAX_EVENTS, BLOCK);
+}
+
+types::FD Epoll::getFD(int& i) { return events[i].data.fd; }
 
 types::FD Epoll::getEpoll() { return *_epoll; }
 

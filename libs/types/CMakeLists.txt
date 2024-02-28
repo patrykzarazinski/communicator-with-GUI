@@ -4,6 +4,7 @@ set(HEADERS
     include/types/ClientID.hpp
     include/types/FD.hpp
     include/types/IP.hpp
+    include/types/NFDS.hpp
     include/types/Port.hpp)
 # set(SOURCES
 #     src/types/Adress.cpp)

@@ -26,8 +26,8 @@ class Server {
   void handleClient(types::FD);
   void broadcast(std::vector<char>, types::FD);
 
-  std::unique_ptr<network::BaseSocket> socket;
+  std::unique_ptr<network::BaseSocket> listenSocket;
   std::unique_ptr<Epoll> epoll;
-  std::vector<types::FD> clientsSocket;
+  std::vector<types::FD> sockets;
 };
 }  // namespace app

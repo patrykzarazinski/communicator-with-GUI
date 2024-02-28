@@ -29,14 +29,14 @@ void clearBuffer(std::string& buffer) {
 }  // namespace
 namespace app {
 Server::Server()
-    : socket{std::make_unique<network::ListenSocket>()},
+    : listenSocket{std::make_unique<network::ListenSocket>()},
       epoll{std::make_unique<Epoll>()} {}
 
 void Server::run(types::IP ip, types::Port port) {
-  socket->createSocket(ip, port);
+  listenSocket->createSocket(ip, port);
   epoll->createEpoll();
 
-  epoll->registerSocket(socket->getFD());
+  epoll->registerSocket(listenSocket->getFD());
   receiveLoop();
 
   return;
@@ -44,11 +44,12 @@ void Server::run(types::IP ip, types::Port port) {
 
 void Server::receiveLoop() {
   const int MAX_EVENTS = 10;
+  const int BLOCK = 1;
   std::vector<epoll_event> events(MAX_EVENTS);
 
   isRunning = true;
   while (isRunning) {
-    int nfds = epoll_wait(epoll->getEpoll(), events.data(), MAX_EVENTS, -1);
+    int nfds = epoll_wait(epoll->getEpoll(), events.data(), MAX_EVENTS, BLOCK);
 
     if (nfds == -1) {
       utils::ErrorHandler::handleError("epoll_wait() failed");
@@ -56,7 +57,7 @@ void Server::receiveLoop() {
 
     for (int i = 0; i < nfds; i++) {
       int fd = events[i].data.fd;
-      if (fd == socket->getFD()) {
+      if (fd == listenSocket->getFD()) {
         handleNewConnection();
       } else {
         handleClient(fd);
@@ -66,45 +67,44 @@ void Server::receiveLoop() {
 }
 
 void Server::handleNewConnection() {
-  sockaddr_in clientAdress{};
-  socklen_t clientAddressLen = sizeof(clientAdress);
+  sockaddr_in address{};
+  socklen_t addressLen = sizeof(address);
 
-  int clientSocket =
-      accept4(socket->getFD(), reinterpret_cast<sockaddr*>(&clientAdress),
-              &clientAddressLen, SOCK_NONBLOCK);
+  int socket =
+      accept4(listenSocket->getFD(), reinterpret_cast<sockaddr*>(&address),
+              &addressLen, SOCK_NONBLOCK);
 
-  if (clientSocket == -1) {  // add EAGAIN or EWOULDBLOCK handling
+  if (socket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     utils::ErrorHandler::handleError("accept4() failed");
   }
 
-  clientsSocket.push_back(clientSocket);
-  epoll->registerSocket(clientSocket);
+  sockets.push_back(socket);
+  epoll->registerSocket(socket);
 }
 
-void Server::handleClient(types::FD clientSocket) {
+void Server::handleClient(types::FD socket) {
   std::vector<char> buffer(1024, '\0');
-  ssize_t readBytes =
-      recv(clientSocket, buffer.data(), buffer.size(), MSG_DONTWAIT);
+  ssize_t readBytes = recv(socket, buffer.data(), buffer.size(), MSG_DONTWAIT);
 
   if (readBytes == -1) {
     if (readBytes == EAGAIN or readBytes == EWOULDBLOCK) {
       std::cout << "No messages are available at the socket" << std::endl;
       return;
     } else {
-      close(clientSocket);
+      close(socket);
       utils::ErrorHandler::handleError("recv() failed");
     }
   } else if (readBytes == 0) {
     std::cout << "Connection closed by peer" << std::endl;
     return;
   } else {
-    broadcast(buffer, clientSocket);
+    broadcast(buffer, socket);
   }
 }
 
-void Server::broadcast(std::vector<char> buffer, types::FD clientSocket) {
-  for (const types::FD& fd : clientsSocket) {
-    if (fd != clientSocket) {
+void Server::broadcast(std::vector<char> buffer, types::FD socket) {
+  for (const types::FD& fd : sockets) {
+    if (fd != socket) {
       send(fd, buffer.data(), buffer.size(), 0);
     }
   }

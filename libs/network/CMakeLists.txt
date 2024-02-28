@@ -1,11 +1,11 @@
 set(MODULE_LIB network)
 
 set(HEADERS
-    include/network/BaseSocket.hpp
+    include/network/ISocket.hpp
     include/network/ListenSocket.hpp
     include/network/Socket.hpp)
  set(SOURCES
-    src/network/BaseSocket.cpp
+    src/network/ISocket.cpp
     src/network/ListenSocket.cpp
     src/network/Socket.cpp)
 

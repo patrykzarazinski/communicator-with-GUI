@@ -11,26 +11,17 @@ void Socket::createSocket(types::IP ip, types::Port port) {
     return;
   }
 
-  types::FD fd = b_socket();
+  types::FD fd = s_socket();
 
   sockaddr_in adress{};
   adress.sin_family = AF_INET;
   adress.sin_port = htons(static_cast<uint16_t>(std::atoi(port.c_str())));
   inet_pton(AF_INET, ip.c_str(), &adress.sin_addr);
 
-  b_bind(adress, fd);
+  s_bind(adress, fd);
 
   _socket = std::make_unique<types::FD>(fd);
 }
-
-void Socket::send() {
-  // todo
-}
-void Socket::receive() {
-  // todo
-}
-
-types::FD Socket::getFD() { return *_socket; }
 
 Socket::~Socket() {
   if (_socket) {

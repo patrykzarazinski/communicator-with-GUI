@@ -67,12 +67,7 @@ void Server::receiveLoop() {
 }
 
 void Server::handleNewConnection() {
-  sockaddr_in address{};
-  socklen_t addressLen = sizeof(address);
-
-  int socket =
-      accept4(listenSocket->getFD(), reinterpret_cast<sockaddr*>(&address),
-              &addressLen, SOCK_NONBLOCK);
+  int socket = listenSocket->accept();
 
   if (socket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     utils::ErrorHandler::handleError("accept4() failed");

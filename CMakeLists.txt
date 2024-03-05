@@ -12,6 +12,7 @@ message(STATUS "GLOBAL_DEPENDS_NO_CYCLES: " ${propValue})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(boost)
+include(protobuf)
 
 add_custom_target(format COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/formatter.sh)
 

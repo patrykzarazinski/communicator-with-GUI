@@ -11,6 +11,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
+    - name: Proto
+      run: |
+      git clone https://github.com/protocolbuffers/protobuf.git
+      cd protobuf
+      git submodule update --init --recursive
+      ./configure
+      make
+      sudo make install
     - name: Install Boost
       run: sudo apt-get update && sudo apt-get install -yq libboost-all-dev
     - name: Generate CMake

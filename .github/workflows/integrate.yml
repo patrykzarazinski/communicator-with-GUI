@@ -15,8 +15,19 @@ jobs:
       run: docker --version
     - name: Docker build
       run: |
-        docker build -t app .
+        docker build -t project .
         if [ $? -ne 0 ]; then
           echo "Docker build failed"
           exit 1 
+        fi
+    - name: Build project
+      run: |
+        docker run --rm project bash -c "\
+          mkdir -p build && \
+          cd build && \
+          cmake .. && \
+          make"
+        if [ $? -ne 0 ]; then
+          echo "Build project failed"
+          exit 1
         fi

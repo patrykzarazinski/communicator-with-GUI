@@ -2,27 +2,28 @@ name: App Continuous Integration
 
 on:
   push:
+    paths-ignore:
+      - 'Dockerfile'
     branches: [ "master" ]
   pull_request:
+    paths-ignore:
+      - 'Dockerfile'
     branches: [ "master" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   Build:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
-    - name: Docker version
-      run: docker --version
-    - name: Docker build
-      run: |
-        docker build -t project .
-        if [ $? -ne 0 ]; then
-          echo "Docker build failed"
-          exit 1 
-        fi
+    - name: Pull Docker image
+      run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:master
     - name: Build project
       run: |
-        docker run --rm project bash -c "\
+        docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:master bash -c "\
           mkdir -p build && \
           cd build && \
           cmake .. && \

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package types;
+
+message TransactionId{
+    string transactionid = 1;
+}
+
+message UUID{
+    string uuid = 1;
+}
+
+enum Cause{
+    UNKNOWN = 0;
+}

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package messages;
+
+import "types.proto";
+
+message ConnectionRequest{
+    types.TransactionId transactionid = 1;
+}
+
+message ConnectionRequestAccept{
+    types.TransactionId transactionid = 1;
+    types.UUID uuid = 2;
+}
+
+message ConnectionRequestAcceptAck{
+    types.TransactionId transactionid = 1;
+    types.UUID uuid = 2;
+}
+
+message ConnectionRequestRefuse{
+    types.TransactionId transactionid = 1;
+    types.Cause cause = 2;
+}
+
+message ConnectionRequestDisconnection{
+    types.UUID uuid = 1;
+}
+
+message Data{
+    bytes payload = 1;
+}

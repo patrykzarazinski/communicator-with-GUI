@@ -13,3 +13,16 @@ message UUID{
 enum Cause{
     UNKNOWN = 0;
 }
+
+message Payload{
+    bytes payload = 1;
+}
+
+enum MessageType {
+    DATA = 0;
+    CONNECTION_REQUEST = 1;
+    CONNECTION_REQUEST_ACCEPT = 2;
+    CONNECTION_REQUEST_ACCEPT_ACK = 3;
+    CONNECTION_REQUEST_REFUSE = 4;
+    CONNECTION_DISCONNECTION = 5;
+}

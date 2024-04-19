@@ -4,6 +4,15 @@ package messages;
 
 import "types.proto";
 
+message Msg{
+    types.MessageType msgtype = 1;
+    types.Payload payload = 2;
+}
+
+message Data{
+    types.Payload payload = 1;
+}
+
 message ConnectionRequest{
     types.TransactionId transactionid = 1;
 }
@@ -23,10 +32,6 @@ message ConnectionRequestRefuse{
     types.Cause cause = 2;
 }
 
-message ConnectionRequestDisconnection{
+message ConnectionDisconnection{
     types.UUID uuid = 1;
-}
-
-message Data{
-    bytes payload = 1;
 }

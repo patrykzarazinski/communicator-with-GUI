@@ -4,31 +4,26 @@ package messages;
 
 import "types.proto";
 
-message Msg{
-    types.MessageType msgtype = 1;
-    types.Payload payload = 2;
-}
-
 message Data{
-    types.Payload payload = 1;
+    types.Data data = 1;
 }
 
 message ConnectionRequest{
-    types.TransactionId transactionid = 1;
+    types.TransactionId transaction_id = 1;
 }
 
 message ConnectionRequestAccept{
-    types.TransactionId transactionid = 1;
+    types.TransactionId transaction_id = 1;
     types.UUID uuid = 2;
 }
 
 message ConnectionRequestAcceptAck{
-    types.TransactionId transactionid = 1;
+    types.TransactionId transaction_id = 1;
     types.UUID uuid = 2;
 }
 
 message ConnectionRequestRefuse{
-    types.TransactionId transactionid = 1;
+    types.TransactionId transaction_id = 1;
     types.Cause cause = 2;
 }
 

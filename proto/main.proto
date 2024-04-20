@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package main;
+
+import "messages.proto";
+
+enum MessageType{
+    DATA = 0;
+    CONNECTION_REQUEST = 1;
+    CONNECTION_REQUEST_ACCEPT = 2;
+    CONNECTION_REQUEST_ACCEPT_ACK = 3;
+    CONNECTION_REQUEST_REFUSE = 4;
+    CONNECTION_DISCONNECTION = 5;
+}
+
+message Payload{
+    oneof payload{
+        messages.Data data = 1;
+        messages.ConnectionRequest connection_request = 2;
+        messages.ConnectionRequestAccept connection_request_accept = 3;
+        messages.ConnectionRequestAcceptAck connection_request_accept_ack = 4;
+        messages.ConnectionRequestRefuse connection_request_refuse = 5;
+        messages.ConnectionDisconnection connection_disconnection = 6;
+    }
+}
+
+message Msg{
+    MessageType msg_type = 1;
+    Payload payload = 2;
+}

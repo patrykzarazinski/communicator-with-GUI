@@ -86,6 +86,7 @@ void Server::handleClient(types::FD socket) {
     }
   } else if (readBytes == 0) {
     std::cout << "Connection closed by peer" << std::endl;
+    close(socket);
     return;
   } else {
     broadcast(buffer, socket);

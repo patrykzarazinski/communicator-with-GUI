@@ -9,7 +9,7 @@
 
 namespace {
 const int MAX_EVENTS = 10;
-const int BLOCK = 1;
+const int BLOCK = -1;
 }  // namespace
 
 static std::vector<epoll_event> events(MAX_EVENTS);

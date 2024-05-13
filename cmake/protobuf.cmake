@@ -17,6 +17,8 @@ set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(REMOVE_RECURSE ${PROTO_BINARY_DIR})
 file(MAKE_DIRECTORY ${PROTO_BINARY_DIR})
 
+include_directories(${PROTO_BINARY_DIR})
+
 target_include_directories(proto-objects PUBLIC "$<BUILD_INTERFACE:${PROTO_BINARY_DIR}>")
 
 protobuf_generate(

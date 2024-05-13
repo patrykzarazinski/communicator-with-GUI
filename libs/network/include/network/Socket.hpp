@@ -12,6 +12,8 @@ class Socket final : public ISocket {
   virtual ~Socket();
 
   void createSocket(types::IP, types::Port) override;
-  // todo
+
+ private:
+  void s_connect(sockaddr_in&, types::FD&);
 };
 }  // namespace network

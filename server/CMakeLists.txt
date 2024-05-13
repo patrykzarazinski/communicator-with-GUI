@@ -14,9 +14,11 @@ add_library(lib::server ALIAS ${MODULE_LIB})
 target_link_libraries(${MODULE_LIB} 
 PUBLIC
     ${Boost_LIBRARIES}
+    lib::core
     lib::network
     lib::types
-    lib::utils)
+    lib::utils
+    lib::messages)
 target_include_directories(${MODULE_LIB} PUBLIC include PRIVATE src)
 
 add_executable(${MODULE_NAME} main.cpp)

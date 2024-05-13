@@ -5,9 +5,9 @@
 #include "types/Port.hpp"
 
 void runApp(types::IP ip, types::Port port) {
-  client::ClientApp clientApp(ip, port);
+  app::Client client{};
 
-  clientApp.run();
+  client.run(ip, port);
 }
 
 int main(int argc, char** argv) {

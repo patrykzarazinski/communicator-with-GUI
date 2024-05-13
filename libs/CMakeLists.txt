@@ -1,3 +1,5 @@
+add_subdirectory(core)
+add_subdirectory(messages)
 add_subdirectory(network)
 add_subdirectory(types)
 add_subdirectory(utils)

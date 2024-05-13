@@ -1,11 +1,16 @@
 set(MODULE_LIB types)
 
 set(HEADERS
+    include/types/Buffer.hpp
+    include/types/Cause.hpp
     include/types/ClientID.hpp
+    include/types/Data.hpp
     include/types/FD.hpp
     include/types/IP.hpp
     include/types/NFDS.hpp
-    include/types/Port.hpp)
+    include/types/Port.hpp
+    include/types/TransactionId.hpp
+    include/types/UUID.hpp)
 # set(SOURCES
 #     src/types/Adress.cpp)
 

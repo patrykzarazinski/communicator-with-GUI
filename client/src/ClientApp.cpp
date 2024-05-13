@@ -9,15 +9,9 @@
 #include "network/Socket.hpp"
 #include "utils/Overload.hpp"
 
-namespace {
-void clearBuffer(std::string& buffer) {
-  // TODO Using std::string::clear or std::string::erase lead to infinity loop
-  // probably due to invalidate internal iterators, references, pointers
-  for (auto& item : buffer) {
-    item = '\0';
-  }
-}
-}  // namespace
+static bool isReceiveLoopRunning = false;
+static bool isSenderLoopRunning = false;
+
 namespace app {
 Client::Client()
     : socket{std::make_unique<network::Socket>()},
@@ -35,7 +29,8 @@ void Client::run(types::IP ip, types::Port port) {
 }
 
 void Client::receiveLoop() {
-  while (true)  // TODO must somehow exit from this loop
+  isReceiveLoopRunning = true;
+  while (isReceiveLoopRunning)  // TODO must somehow exit from this loop
   {
     messages::Message message = receiver->receive(socket->getFD());
 
@@ -70,7 +65,8 @@ void Client::receiveLoop() {
 }
 
 void Client::senderLoop() {
-  while (true)  // TODO must somehow exit from this loop
+  isSenderLoopRunning = true;
+  while (isSenderLoopRunning)  // TODO must somehow exit from this loop
   {
     messages::Message message = messages::Data();
     std::getline(std::cin, std::get<messages::Data>(message).data);

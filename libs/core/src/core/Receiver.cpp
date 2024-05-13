@@ -17,17 +17,15 @@ bool checkReadBytes(ssize_t& readBytes, const types::FD& socket) {
   }
 
   if (readBytes == -1) {
-    // TODO not needed? MSG_DONTWAIT not used?
-    if (readBytes == EAGAIN or readBytes == EWOULDBLOCK) {
-      // TODO add logger lib
-      std::cout << "No messages are available at the socket" << std::endl;
-    } else {
-      close(socket);
-      utils::ErrorHandler::handleError("recv() failed");
-    }
+    close(socket);
+    utils::ErrorHandler::handleError("recv() failed");
   } else if (readBytes == 0) {
+    // TODO add logger lib
     std::cout << "Connection closed by peer" << std::endl;
     close(socket);
+    /*
+    TODO when cleint use ctrl+c it close connection properly and return 0 bytes read,
+    but protobuf not recognize 0 so we have deserialization error*/
   }
 
   return false;

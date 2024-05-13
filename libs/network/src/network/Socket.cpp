@@ -20,7 +20,6 @@ void Socket::createSocket(types::IP ip, types::Port port) {
   adress.sin_port = htons(static_cast<uint16_t>(std::atoi(port.c_str())));
   inet_pton(AF_INET, ip.c_str(), &adress.sin_addr);
 
-  // s_bind(adress, fd);
   s_connect(adress, fd);
 
   _socket = std::make_unique<types::FD>(fd);

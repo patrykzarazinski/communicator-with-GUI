@@ -11,25 +11,20 @@
 #include <vector>
 
 #include "Epoll.hpp"
+#include "core/Receiver.hpp"
+#include "core/Sender.hpp"
 #include "network/ListenSocket.hpp"
 #include "utils/ErrorHandler.hpp"
+#include "utils/Overload.hpp"
 
 static bool isRunning = false;
 
-namespace {
-void clearBuffer(std::string& buffer) {
-  // TODO Using std::string::clear or std::string::erase lead to infinity loop
-  // probably due to invalidate internal iterators, references, pointers
-  for (auto& item : buffer) {
-    item = '\0';
-  }
-}
-
-}  // namespace
 namespace app {
 Server::Server()
     : listenSocket{std::make_unique<network::ListenSocket>()},
-      epoll{std::make_unique<Epoll>()} {}
+      epoll{std::make_unique<Epoll>()},
+      receiver{std::make_unique<core::Receiver>()},
+      sender{std::make_unique<core::Sender>()} {}
 
 void Server::run(types::IP ip, types::Port port) {
   listenSocket->createSocket(ip, port);
@@ -67,36 +62,53 @@ void Server::handleNewConnection() {
   if (socket == -1) {  // add EAGAIN or EWOULDBLOCK handling
     utils::ErrorHandler::handleError("accept4() failed");
   }
-
+  /*
+    TODO Aby moc przeprowadzic rejestracje uzytkownia i odebrac wiadomosci, recv
+    musi blokowac doczasu otrzymania wiadomosci, aby to zrobic trzeba socketa
+    ustawic na SOCK_STREAM i ewentuanie jakis timeout, i zmienic accept_4 na
+    accept bez flagi, ktora daje errory jak jest socket na block ustawiony
+  */
   sockets.push_back(socket);
   epoll->registerSocket(socket);
 }
 
 void Server::handleClient(types::FD socket) {
-  std::vector<char> buffer(1024, '\0');
-  ssize_t readBytes = recv(socket, buffer.data(), buffer.size(), MSG_DONTWAIT);
+  messages::Message message = receiver->receive(socket);
 
-  if (readBytes == -1) {
-    if (readBytes == EAGAIN or readBytes == EWOULDBLOCK) {
-      std::cout << "No messages are available at the socket" << std::endl;
-      return;
-    } else {
-      close(socket);
-      utils::ErrorHandler::handleError("recv() failed");
-    }
-  } else if (readBytes == 0) {
-    std::cout << "Connection closed by peer" << std::endl;
-    close(socket);
-    return;
-  } else {
-    broadcast(buffer, socket);
-  }
+  std::visit(utils::overload{
+                 [this, &socket](messages::Data& msg) {
+                   // TODO add loger lib
+                   std::cout << "Message Data received" << std::endl;
+                   broadcast(msg, socket);
+                 },
+                 [](messages::ConnectionRequest& msg) {
+                   std::cout << "Message ConnectionRequest received"
+                             << std::endl;
+                 },
+                 [](messages::ConnectionRequestAccept& msg) {
+                   std::cout << "Message ConnectionRequestAccept received"
+                             << std::endl;
+                 },
+                 [](messages::ConnectionRequestAcceptAck& msg) {
+                   std::cout << "Message ConnectionRequestAcceptAck received"
+                             << std::endl;
+                 },
+                 [](messages::ConnectionRequestRefuse& msg) {
+                   std::cout << "Message ConnectionRequestRefuse received"
+                             << std::endl;
+                 },
+                 [](messages::ConnectionDisconnection& msg) {
+                   std::cout << "Message ConnectionDisconnection received"
+                             << std::endl;
+                 }},
+             message);
 }
 
-void Server::broadcast(std::vector<char> buffer, types::FD socket) {
+void Server::broadcast(const messages::Message& message,
+                       const types::FD& socket) {
   for (const types::FD& fd : sockets) {
     if (fd != socket) {
-      send(fd, buffer.data(), buffer.size(), 0);
+      sender->send(fd, message);
     }
   }
 }

@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "ServerApp.hpp"
+#include "types/IP.hpp"
+#include "types/Port.hpp"
 
 void runApp(types::IP ip, types::Port port) {
   app::Server server{};

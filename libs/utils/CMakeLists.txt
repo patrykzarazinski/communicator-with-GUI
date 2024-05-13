@@ -1,7 +1,8 @@
 set(MODULE_LIB utils)
 
 set(HEADERS
-    include/utils/ErrorHandler.hpp)
+    include/utils/ErrorHandler.hpp
+    include/utils/Overload.hpp)
 set(SOURCES)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})

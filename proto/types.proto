@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package types;
+package protobuf.types;
 
 message TransactionId{
     string transaction_id = 1;
@@ -15,5 +15,5 @@ enum Cause{
 }
 
 message Data{
-    bytes data = 1;
+    string data = 1;
 }

@@ -46,4 +46,5 @@ void ISocket::s_listen(types::FD &fd) {
     utils::ErrorHandler::handleError("listen() failed");
   }
 }
+void ISocket::s_connect(sockaddr_in &, types::FD &) {}
 }  // namespace network

@@ -23,6 +23,7 @@ class ISocket {
   types::FD s_accept4();
   void s_bind(sockaddr_in&, types::FD&);
   void s_listen(types::FD&);
+  void s_connect(sockaddr_in&, types::FD&);
 
   std::unique_ptr<types::FD> _socket{nullptr};
 };

@@ -1,22 +1,33 @@
 #pragma once
-#include <mutex>
 
-#include "ClientContext.hpp"
+#include <memory>
+
 #include "types/IP.hpp"
 #include "types/Port.hpp"
 
-namespace client {
-class ClientApp {
+namespace network {
+class ISocket;
+}  // namespace network
+
+namespace core {
+class Receiver;
+class Sender;
+}  // namespace core
+
+namespace app {
+class Client {
  public:
-  ClientApp(types::IP, types::Port);
-  virtual ~ClientApp();
-  void run();
+  Client();
+  virtual ~Client();
+
+  void run(types::IP, types::Port);
 
  private:
   void receiveLoop();
-  void sender();
+  void senderLoop();
 
-  ClientContext clientContext;
-  std::mutex mutex;
+  std::unique_ptr<network::ISocket> socket;
+  std::unique_ptr<core::Receiver> receiver;
+  std::unique_ptr<core::Sender> sender;
 };
-}  // namespace client
+}  // namespace app

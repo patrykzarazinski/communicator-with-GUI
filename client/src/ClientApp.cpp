@@ -8,15 +8,14 @@
 #include "core/Sender.hpp"
 #include "messages/Message.hpp"
 #include "network/Socket.hpp"
+#include "spdlog/spdlog.h"
 #include "utils/Overload.hpp"
 
 static bool isReceiveLoopRunning = false;
 static bool isSenderLoopRunning = false;
 
 namespace {
-void signalHandler(int sig) {
-  std::cout << "Better not to use ctrl+c" << std::endl;
-}
+void signalHandler(int sig) { spdlog::info("Better not to use ctrl+c"); }
 
 }  // namespace
 namespace app {
@@ -44,32 +43,27 @@ void Client::receiveLoop() {
     messages::Message message = receiver->receive(socket->getFD());
 
     // TODO not all messages belong to client app
-    std::visit(utils::overload{
-                   [](messages::Data& msg) {
-                     // TODO add loger lib
-                     std::cout << msg.data << std::endl;
-                   },
-                   [](messages::ConnectionRequest& msg) {
-                     std::cout << "Message ConnectionRequest received"
-                               << std::endl;
-                   },
-                   [](messages::ConnectionRequestAccept& msg) {
-                     std::cout << "Message ConnectionRequestAccept received"
-                               << std::endl;
-                   },
-                   [](messages::ConnectionRequestAcceptAck& msg) {
-                     std::cout << "Message ConnectionRequestAcceptAck received"
-                               << std::endl;
-                   },
-                   [](messages::ConnectionRequestRefuse& msg) {
-                     std::cout << "Message ConnectionRequestRefuse received"
-                               << std::endl;
-                   },
-                   [](messages::ConnectionDisconnection& msg) {
-                     std::cout << "Message ConnectionDisconnection received"
-                               << std::endl;
-                   }},
-               message);
+    std::visit(
+        utils::overload{[](messages::Data& msg) {
+                          spdlog::info("Data received");
+                          std::cout << msg.data << std::endl;
+                        },
+                        [](messages::ConnectionRequest& msg) {
+                          spdlog::info("ConnectionRequest received");
+                        },
+                        [](messages::ConnectionRequestAccept& msg) {
+                          spdlog::info("ConnectionRequestAccept received");
+                        },
+                        [](messages::ConnectionRequestAcceptAck& msg) {
+                          spdlog::info("ConnectionRequestAcceptAck received");
+                        },
+                        [](messages::ConnectionRequestRefuse& msg) {
+                          spdlog::info("ConnectionRequestRefuse received");
+                        },
+                        [](messages::ConnectionDisconnection& msg) {
+                          spdlog::info("ConnectionDisconnection received");
+                        }},
+        message);
   }
 }
 
@@ -83,5 +77,5 @@ void Client::senderLoop() {
   }
 }
 
-Client::~Client() { std::cout << "Client shutdown" << std::endl; };
+Client::~Client() { spdlog::info("Client shutdown"); };
 }  // namespace app

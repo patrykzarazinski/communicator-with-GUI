@@ -99,7 +99,7 @@ protobuf::main::Msg serializeConnectionDisconnection(
 }  // namespace
 
 namespace core {
-// TODO size of buffer and size of protobuf messages is not synchronized
+//  size of buffer and size of protobuf messages is not synchronized
 // TODO synchronize with tcp/ip protocol, mtu etc.
 
 void send_internal(const types::FD& socket, protobuf::main::Msg msg) {

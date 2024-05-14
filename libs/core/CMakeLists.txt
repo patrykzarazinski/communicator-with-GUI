@@ -17,4 +17,5 @@ PRIVATE
     lib::types
     lib::utils
     lib::messages
-    proto-objects)
+    proto-objects
+    spdlog::spdlog)

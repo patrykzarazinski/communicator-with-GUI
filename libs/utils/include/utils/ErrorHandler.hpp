@@ -1,14 +1,15 @@
 #pragma once
 
-#include <cstdio>   //std::perror
 #include <cstdlib>  //std::exit, std::atoi
 #include <string>
+
+#include "spdlog/spdlog.h"
 
 namespace utils {
 class ErrorHandler {
  public:
   static void handleError(const std::string& message) {
-    std::perror(message.c_str());
+    spdlog::error("{}", message);
     std::exit(EXIT_FAILURE);
   }
 };

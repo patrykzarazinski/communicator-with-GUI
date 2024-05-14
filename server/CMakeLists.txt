@@ -18,7 +18,8 @@ PUBLIC
     lib::network
     lib::types
     lib::utils
-    lib::messages)
+    lib::messages
+    spdlog::spdlog)
 target_include_directories(${MODULE_LIB} PUBLIC include PRIVATE src)
 
 add_executable(${MODULE_NAME} main.cpp)

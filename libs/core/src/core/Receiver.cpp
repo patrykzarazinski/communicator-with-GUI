@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "main.pb.h"
-//#include "spdlog/spdlog.h"
+#include "spdlog/spdlog.h"
 #include "types/Buffer.hpp"
 #include "utils/ErrorHandler.hpp"
 
@@ -21,7 +21,7 @@ bool checkReadBytes(ssize_t& readBytes, const types::FD& socket) {
     close(socket);
     utils::ErrorHandler::handleError("recv() failed");
   } else if (readBytes == 0) {
-   // spdlog::info("Connection closed by peer");
+    spdlog::info("Connection closed by peer");
     close(socket);
   }
 

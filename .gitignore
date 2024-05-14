@@ -3,3 +3,4 @@ external
 NOTES.txt
 .vscode
 Example*
+spdlog

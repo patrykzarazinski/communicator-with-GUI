@@ -1,5 +1,6 @@
 #include "ClientApp.hpp"
 
+#include <csignal>
 #include <iostream>
 #include <thread>
 
@@ -12,6 +13,12 @@
 static bool isReceiveLoopRunning = false;
 static bool isSenderLoopRunning = false;
 
+namespace {
+void signalHandler(int sig) {
+  std::cout << "Better not to use ctrl+c" << std::endl;
+}
+
+}  // namespace
 namespace app {
 Client::Client()
     : socket{std::make_unique<network::Socket>()},
@@ -19,6 +26,8 @@ Client::Client()
       sender{std::make_unique<core::Sender>()} {}
 
 void Client::run(types::IP ip, types::Port port) {
+  std::signal(SIGINT, signalHandler);
+
   socket->createSocket(ip, port);
 
   std::thread receiving(&app::Client::receiveLoop, this);

@@ -14,7 +14,7 @@
 #include "core/Receiver.hpp"
 #include "core/Sender.hpp"
 #include "network/ListenSocket.hpp"
-#include "spdlog/spdlog.h"
+//#include "spdlog/spdlog.h"
 #include "utils/ErrorHandler.hpp"
 #include "utils/Overload.hpp"
 
@@ -28,7 +28,7 @@ Server::Server()
       sender{std::make_unique<core::Sender>()} {}
 
 void Server::run(types::IP ip, types::Port port) {
-  spdlog::info("Server started");
+ // spdlog::info("Server started");
 
   listenSocket->createSocket(ip, port);
   epoll->createEpoll();
@@ -80,23 +80,23 @@ void Server::handleClient(types::FD socket) {
 
   std::visit(
       utils::overload{[this, &socket](messages::Data& msg) {
-                        spdlog::info("Data received");
+                     //   spdlog::info("Data received");
                         broadcast(msg, socket);
                       },
                       [](messages::ConnectionRequest& msg) {
-                        spdlog::info("ConnectionRequest received");
+                    //    spdlog::info("ConnectionRequest received");
                       },
                       [](messages::ConnectionRequestAccept& msg) {
-                        spdlog::info("ConnectionRequestAccept received");
+                     //   spdlog::info("ConnectionRequestAccept received");
                       },
                       [](messages::ConnectionRequestAcceptAck& msg) {
-                        spdlog::info("ConnectionRequestAcceptAck received");
+                    //    spdlog::info("ConnectionRequestAcceptAck received");
                       },
                       [](messages::ConnectionRequestRefuse& msg) {
-                        spdlog::info("ConnectionRequestRefuse received");
+                    //    spdlog::info("ConnectionRequestRefuse received");
                       },
                       [](messages::ConnectionDisconnection& msg) {
-                        spdlog::info("ConnectionDisconnection received");
+                    //    spdlog::info("ConnectionDisconnection received");
                       }},
       message);
 }
@@ -110,5 +110,7 @@ void Server::broadcast(const messages::Message& message,
   }
 }
 
-Server::~Server() { spdlog::info("Server shutdown"); };
+Server::~Server() {
+  // spdlog::info("Server shutdown");
+   };
 }  // namespace app

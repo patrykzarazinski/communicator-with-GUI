@@ -23,9 +23,6 @@ bool checkReadBytes(ssize_t& readBytes, const types::FD& socket) {
     // TODO add logger lib
     std::cout << "Connection closed by peer" << std::endl;
     close(socket);
-    /*
-    TODO when cleint use ctrl+c it close connection properly and return 0 bytes read,
-    but protobuf not recognize 0 so we have deserialization error*/
   }
 
   return false;

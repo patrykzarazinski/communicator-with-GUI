@@ -1,2 +1,2 @@
-# communicator-with-GUI
+# custom-console-messenger
 In progress.

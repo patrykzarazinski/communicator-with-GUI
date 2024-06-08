@@ -57,5 +57,5 @@ RUN git clone https://github.com/gabime/spdlog.git && \
     cd spdlog && mkdir build && cd build && \
     git checkout v1.14.1 && \
     cmake .. && make -j
-#temporary_change
+
 CMD ["bash"]

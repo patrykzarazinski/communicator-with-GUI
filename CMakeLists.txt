@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21.3)
 
-project(communicator-with-GUI CXX)
+project(custom-console-messenger CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 message(STATUS "CMAKE_CXX_STANDARD: " ${CMAKE_CXX_STANDARD})

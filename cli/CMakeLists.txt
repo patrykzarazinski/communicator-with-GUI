@@ -1,17 +1,15 @@
-set(MODULE_NAME server)
+set(MODULE_NAME cli)
 set(MODULE_LIB ${MODULE_NAME}_lib)
 
 set(HEADERS
-    include/Epoll.hpp
-    include/ServerApp.hpp)
+    include/CLI.hpp)
 set(SOURCES
-    src/Epoll.cpp
-    src/ServerApp.cpp)
+    src/CLI.cpp)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})
-add_library(lib::server ALIAS ${MODULE_LIB})
+add_library(lib::cli ALIAS ${MODULE_LIB})
 
-target_link_libraries(${MODULE_LIB} 
+target_link_libraries(${MODULE_LIB}
 PUBLIC
     ${Boost_LIBRARIES}
     lib::core
@@ -26,4 +24,4 @@ add_executable(${MODULE_NAME} main.cpp)
 
 target_link_libraries(${MODULE_NAME}
 PRIVATE
-    lib::server)
+    lib::cli)

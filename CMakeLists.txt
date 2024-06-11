@@ -18,5 +18,6 @@ add_custom_target(format COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/formatter.sh)
 
 add_subdirectory(libs)
 add_subdirectory(client)
+add_subdirectory(cli)
 add_subdirectory(server)
 add_subdirectory(spdlog)

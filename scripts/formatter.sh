@@ -8,4 +8,4 @@ then
     exit
 fi
 
-find ../client/ ../server/ ../libs | grep .*[hc]pp | xargs $FORMATTER --style=Google -i
+find ../client/ ../server/ ../libs ../cli | grep .*[hc]pp | xargs $FORMATTER --style=Google -i

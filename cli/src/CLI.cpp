@@ -72,8 +72,10 @@ void CLI::handleCommand(const std::string& command) {
   } else if (cmd == "close") {
     int id;
     iss >> id;
-    if (iss) {
-      // todo request to close client
+    if (iss and id >= 0) {
+      messages::ConnectionDisconnection message;
+      message.uuid = id;
+      sender->send(socket->getFD(), message);
     } else {
       std::cerr << "Invalid input" << std::endl;
     }

@@ -43,27 +43,30 @@ void Client::receiveLoop() {
     messages::Message message = receiver->receive(socket->getFD());
 
     // TODO not all messages belong to client app
-    std::visit(
-        utils::overload{[](messages::Data& msg) {
-                          spdlog::info("Data received");
-                          std::cout << msg.data << std::endl;
-                        },
-                        [](messages::ConnectionRequest& msg) {
-                          spdlog::info("ConnectionRequest received");
-                        },
-                        [](messages::ConnectionRequestAccept& msg) {
-                          spdlog::info("ConnectionRequestAccept received");
-                        },
-                        [](messages::ConnectionRequestAcceptAck& msg) {
-                          spdlog::info("ConnectionRequestAcceptAck received");
-                        },
-                        [](messages::ConnectionRequestRefuse& msg) {
-                          spdlog::info("ConnectionRequestRefuse received");
-                        },
-                        [](messages::ConnectionDisconnection& msg) {
-                          spdlog::info("ConnectionDisconnection received");
-                        }},
-        message);
+    std::visit(utils::overload{
+                   [](messages::Data& msg) {
+                     spdlog::info("Data received");
+                     std::cout << msg.data << std::endl;
+                   },
+                   [](messages::ConnectionRequestAccept& msg) {
+                     spdlog::info("ConnectionRequestAccept received");
+                   },
+                   [](messages::ConnectionRequestRefuse& msg) {
+                     spdlog::info("ConnectionRequestRefuse received");
+                   },
+                   [](messages::ConnectionDisconnection& msg) {
+                     spdlog::info("ConnectionDisconnection received");
+                   },
+                   [](messages::ConnectionRequest& msg) {  // Discard
+                     return;
+                   },
+                   [](messages::ConnectionRequestAcceptAck& msg) {  // Discard
+                     return;
+                   },
+                   [](messages::Null) {  // Discard
+                     return;
+                   }},
+               message);
   }
 }
 

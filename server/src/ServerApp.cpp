@@ -86,17 +86,20 @@ void Server::handleClient(types::FD socket) {
                       [](messages::ConnectionRequest& msg) {
                         spdlog::info("ConnectionRequest received");
                       },
-                      [](messages::ConnectionRequestAccept& msg) {
-                        spdlog::info("ConnectionRequestAccept received");
-                      },
                       [](messages::ConnectionRequestAcceptAck& msg) {
                         spdlog::info("ConnectionRequestAcceptAck received");
                       },
-                      [](messages::ConnectionRequestRefuse& msg) {
-                        spdlog::info("ConnectionRequestRefuse received");
-                      },
                       [](messages::ConnectionDisconnection& msg) {
                         spdlog::info("ConnectionDisconnection received");
+                      },
+                      [](messages::ConnectionRequestAccept&) {  // Discard
+                        return;
+                      },
+                      [](messages::ConnectionRequestRefuse&) {  // Discard`
+                        return;
+                      },
+                      [](messages::Null) {  // Discard
+                        return;
                       }},
       message);
 }

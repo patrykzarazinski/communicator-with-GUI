@@ -4,7 +4,6 @@
 #include <unistd.h>  // close, read
 
 #include <cstring>
-#include <iostream>
 
 #include "main.pb.h"
 #include "spdlog/spdlog.h"
@@ -21,7 +20,7 @@ bool checkReadBytes(ssize_t& readBytes, const types::FD& socket) {
     close(socket);
     utils::ErrorHandler::handleError("recv() failed");
   } else if (readBytes == 0) {
-    spdlog::info("Connection closed by peer");
+    spdlog::info("Connection closed by peer for fd: {}", socket);
     close(socket);
   }
 
@@ -161,12 +160,18 @@ types::Buffer receive_internal(const types::FD& socket) {
 messages::Message Receiver::receive(const types::FD socket) {
   types::Buffer buffer = receive_internal(socket);
 
+  if (buffer.empty()) {
+    spdlog::debug("Buffer is empty. Returning Null message");
+    return messages::Null();
+  }
+
   protobuf::main::Msg msg;
   if (not msg.ParseFromString(buffer)) {
     // TODO enhance error handlers, the log "ParseFromString returned false:
     // Success" at error is printed
     utils::ErrorHandler::handleError("ParseFromString returned false");
   }
+
   switch (msg.msg_type()) {
     case protobuf::main::MessageType::DATA:
       return deserializeData(msg.payload());

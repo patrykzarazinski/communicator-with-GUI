@@ -7,7 +7,8 @@ set(HEADERS
     include/messages/ConnectionRequestAcceptAck.hpp
     include/messages/ConnectionRequestRefuse.hpp
     include/messages/Data.hpp
-    include/messages/Message.hpp)
+    include/messages/Message.hpp
+    include/messages/Null.hpp)
 set(SOURCES)
 
 add_library(${MODULE_LIB} ${HEADERS} ${SOURCES})

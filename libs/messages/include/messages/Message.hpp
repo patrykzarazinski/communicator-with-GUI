@@ -8,11 +8,13 @@
 #include "messages/ConnectionRequestAcceptAck.hpp"
 #include "messages/ConnectionRequestRefuse.hpp"
 #include "messages/Data.hpp"
+#include "messages/Null.hpp"
 
 // clang-format off
 namespace messages {
 using Message =
     std::variant<
+        messages::Null,
         messages::ConnectionDisconnection,
         messages::ConnectionRequest,
         messages::ConnectionRequestAccept,

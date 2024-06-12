@@ -136,6 +136,10 @@ void Sender::send(const types::FD socket, messages::Message message) {
                  },
                  [&](messages::ConnectionDisconnection& msg) {
                    send_internal(socket, serializeConnectionDisconnection(msg));
+                 },
+                 [](messages::Null) {
+                   // Discard
+                   return;
                  }},
              message);
 }
